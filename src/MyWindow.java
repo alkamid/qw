@@ -30,6 +30,8 @@ public class MyWindow {
 	private ILineSeries dataVBO, dataCBO;
 	private MyPlot plotMain;
 	
+	private int sc;
+	
 	public MyWindow(){
 		
 		this.display = new Display();
@@ -69,12 +71,28 @@ public class MyWindow {
 		this.chooseBinary4.setBounds(360,400,70,30);
 		
 		int xpos = 120;
-		for (int i=0; i<4; i++) {
-			this.setXBinary[i] = new Spinner(this.shell, SWT.NONE);
-			binarySpinner(this.setXBinary[i]);
-			this.setXBinary[i].setBounds(xpos, 440, 70, 20);
+		/*
+		sc = this.sc;
+		for (this.sc=0; this.sc<4; sc++) {
+			this.setXBinary[sc] = new Spinner(this.shell, SWT.NONE);
+			binarySpinner(this.setXBinary[sc]);
+			this.setXBinary[sc].setBounds(xpos, 440, 70, 20);
 			xpos += 80;
-		}
+			
+			
+			this.setXBinary[sc].addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					int selection = MyWindow.this.setXBinary[sc].getSelection();
+					int digits = MyWindow.this.setXBinary[sc].getDigits();
+					switch(sc) {
+					case 0:	MyWindow.this.setXBinary[1].setSelection(100-selection);	break;
+					case 1: MyWindow.this.setXBinary[0].setSelection(100-selection);	break;
+					case 2: MyWindow.this.setXBinary[3].setSelection(100-selection);	break;
+					case 3: MyWindow.this.setXBinary[2].setSelection(100-selection);	break;
+					}
+				}
+			});
+		}*/
 		
 		
 		this.setX.addSelectionListener(new SelectionAdapter() {
@@ -117,7 +135,7 @@ public class MyWindow {
 				int digits = MyWindow.this.setXBinary[3].getDigits();
 				MyWindow.this.setXBinary[2].setSelection(100-selection);
 			}
-		});	
+		});
 		
 		
 		while (!this.shell.isDisposed ()) { //petla dla obslugi srodowiska graficznego
