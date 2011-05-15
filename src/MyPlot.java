@@ -23,21 +23,29 @@ public class MyPlot extends Chart {
 	
 	private Display display;
 	private Shell shell;
+	private MyWindow window;
 	public CompoundBinary substrate;
-	public CompoundBinary gasb;
-	public CompoundTernary layer;
+	public CompoundBinary gasb, gaas, inas, insb;
+	public CompoundTernary layer, ternary1, ternary2;
 	public ILineSeries dataCBO, dataVBO, dataMargin;
 	double x;
 	
-	public MyPlot(Display display,Shell shell) {
+	public MyPlot(Display display,Shell shell, MyWindow mywindow) {
 
 		super(shell,SWT.NONE);
 		this.display = display;
 		this.shell = shell;
+		this.window = mywindow;
 		
-		this.substrate = new CompoundBinary("GaAs", 1.519, 0, -0.8, -7.17, -1.16, 1221, 566, -2.0);
-		this.gasb = new CompoundBinary("GaSb", 0.812, 1, -0.03, -7.5, -0.8, 884.2, 402.6, -2.0);
+		this.substrate = new CompoundBinary(0);
+		gasb = new CompoundBinary(2);
+		gaas = new CompoundBinary(0);
+		inas = new CompoundBinary(1);
+		insb = new CompoundBinary(3);
 		this.layer = new CompoundTernary(substrate, gasb, -1.06, 1.25);
+		ternary1 = new CompoundTernary(gaas, inas);
+		ternary2 = new CompoundTernary(gasb, insb);
+		
 		
 		dataCBO = (ILineSeries) this.getSeriesSet().createSeries(SeriesType.LINE, "CBO");
 		dataCBO.setXSeries(new double[]{0.1, 0.4, 0.4001, 0.8, 0.8001, 1.0});
@@ -67,6 +75,22 @@ public class MyPlot extends Chart {
 		this.x = x;
 	}
 	
+	void resetComp() {
+		double Xbin1 = window.getComp(1) / Math.pow(10, 2);
+		System.out.println(Xbin1);
+		double Xbin3 = window.getComp(3) / Math.pow(10, 2);
+		System.out.println(Xbin3);
+		double Xter1 = window.getComp(5) / Math.pow(10, 2);
+		System.out.println(Xter1);
+		double qwVBO = (1-Xter1)*ternary1.valueVBO(Xbin1) + Xter1*ternary2.valueVBO(Xbin3);
+		double qwBandgap = (1-Xter1)*ternary1.valueBandgap(Xbin1) + Xter1*ternary2.valueBandgap(Xbin3);
+		double[] tableVBO = new double[]{substrate.VBO, substrate.VBO, qwVBO, qwVBO, substrate.VBO, substrate.VBO};
+		double[] tableCBO = new double[]{substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap, qwVBO+qwBandgap, qwVBO+qwBandgap, substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap};
+		dataVBO.setYSeries(tableVBO);
+		dataCBO.setYSeries(tableCBO);
+		margin(tableVBO, tableCBO);
+	}
+	
 	void replot() {
 		double[] tableVBO = new double[]{substrate.VBO, substrate.VBO, layer.valueVBO(x), layer.valueVBO(x), substrate.VBO, substrate.VBO};
 		double[] tableCBO = new double[]{substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap, layer.valueVBO(x)+layer.valueBandgap(x), layer.valueVBO(x)+layer.valueBandgap(x), substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap};
@@ -74,6 +98,7 @@ public class MyPlot extends Chart {
 		dataCBO.setYSeries(tableCBO);
 		margin(tableVBO, tableCBO);
 	}
+	
 	
 	// setting the default margin as 0.1
 	void margin(double[] tableVBO, double[] tableCBO) {
