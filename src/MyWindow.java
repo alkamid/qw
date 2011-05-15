@@ -147,6 +147,8 @@ public class MyWindow {
 		
 		}
 	
+	//test
+	
 	private void binarySpinner(Spinner spinner) {
 		spinner.setDigits(2); // allow 2 decimal places
 		spinner.setMinimum(0); // set the minimum value to 0.00
