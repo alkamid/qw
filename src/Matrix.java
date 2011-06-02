@@ -7,8 +7,11 @@ public class Matrix {
 	public double[] outDiagonal;
 	public double s;
 	public int size;
-	private static double alpha1 = (1.054571628*1.054571628)/(2*1.60217646);
-	private static double alpha = (2*9.10938188*1.60217646)/(1.054571628*1.054571628);
+	private static double freeElectronMass = 9.10938215*1.0e-31;
+	private static double hbar = 1.054571628*1.0e-34;
+	private static double nanoMeter = 1.0e-9;
+	private static double electronCharge = 1.602176487*1.0e-19;
+	private double alpha = (2*freeElectronMass*electronCharge*nanoMeter*nanoMeter)/(hbar*hbar);
 	
 	public Matrix(double EWell, double EBarrier, double wellWidth, double barrierWidth, int n) {
 		double fullWidth = 2*barrierWidth+wellWidth;
@@ -96,8 +99,7 @@ public class Matrix {
 	}
 	
 	public double normalizeEnergy(double energy) {
-		//return (energy/(s*s*alpha))/(0.5*1.054571628);
-		return energy/(s*s);
+		return energy/(s*s*alpha);
 	}
 	
 	public double[] Bisect(double wmin, double wmax, int HowMany) {

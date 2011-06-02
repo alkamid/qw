@@ -24,16 +24,16 @@ public class main {
 		
 		//początek testów
 		
-		int n = 100000;
+		int n = 4000;
 		
-		matrix = new Matrix(0,1,100,100,n);
+		matrix = new Matrix(0,1,5,200,n);
 		//double [][] test = rs.TridiagonalHarm(5,n);
 		//double [][] test = rs.Tridiagonal(1,2,20,100,n);
 		//System.out.println(Arrays.toString(matrix.diagonal));	
 		
 		double[] rozw;
-		rozw = matrix.Bisect(0, 2000, 30);
-		for (int i=0; i<30; i++) {
+		rozw = matrix.Bisect(0, 200, 40);
+		for (int i=0; i<40; i++) {
 			
 			rozw[i] = matrix.normalizeEnergy(rozw[i]);
 			if (i>0)
@@ -43,7 +43,7 @@ public class main {
 		
 		//koniec testów
 		
-		//MyWindow window = new MyWindow();
+		MyWindow window = new MyWindow();
 
 	}
 
