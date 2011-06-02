@@ -8,7 +8,7 @@ public class Matrix {
 	public double s;
 	public int size;
 	private static double alpha1 = (1.054571628*1.054571628)/(2*1.60217646);
-	private static double alpha = 1;
+	private static double alpha = (2*9.10938188*1.60217646)/(1.054571628*1.054571628);
 	
 	public Matrix(double EWell, double EBarrier, double wellWidth, double barrierWidth, int n) {
 		double fullWidth = 2*barrierWidth+wellWidth;
@@ -51,40 +51,37 @@ public class Matrix {
 			x[i] = x[0]+s*i;
 		}
 		
-		System.out.println(s);
-		
 		double [] V = new double[n+2];
 		
 		for (int i=0; i<=n+1; i++) {
-			V[i] = 0.5*Math.pow(x[i], 2);
+			V[i] = Math.pow(x[i], 2);
 		}
 				
 		diagonal = new double[n];
 		outDiagonal = new double[n-1];
 
 		for (int i=0; i<n-1; i++) {
-			diagonal[i] = 2+s*s*alpha*V[i+1];
+			diagonal[i] = 2+s*s*V[i+1];
 			outDiagonal[i] = -1;
 		}
-		diagonal[n-1] = 2+s*s*alpha*V[n];
+		diagonal[n-1] = 2+s*s*V[n];
 	}
 	
 	
 	public int Dean(double WellHeight, int HowMany) {
 
-		double diagonalTemp[] = diagonal;
 		double outDiagonalTemp[] = new double[size-1];
 		for (int i=0; i<size-1; i++)
 			outDiagonalTemp[i] = Math.pow(outDiagonal[i], 2);
 		int counter = 0;
 		double u;
 		
-		u=diagonalTemp[0]-WellHeight;
+		u=diagonal[0]-WellHeight;
 		if (u<0)
 			counter++;
 		
 		for (int i=1; i<size; i++) {
-			u=diagonalTemp[i]-WellHeight-outDiagonalTemp[i-1]/u;
+			u=diagonal[i]-WellHeight-outDiagonalTemp[i-1]/u;
 			if (u<0)
 				counter++;
 			if (counter==HowMany)
@@ -107,7 +104,7 @@ public class Matrix {
 		int m1, m2;
 		m1 = Dean(wmin, HowMany);
 		m2 = Dean(wmax, HowMany);
-		double tolerance = Math.pow(10, -12);
+		double tolerance = 1e-16;
 		double[][] wk1 = new double[2][HowMany];
 		int[] wk2 = new int[HowMany];
 		double[] w = new double[HowMany];
