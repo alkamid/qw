@@ -1,13 +1,21 @@
+/* Copyright 2011 Adam Klimont a.k.a. alkamid
+This file is part of Qw.
 
+Qw is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Qw is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Qw.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.swtchart.Chart;
@@ -17,88 +25,75 @@ import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
 
 public class MyPlot extends Chart {
-
-	private int plotWidth, plotHeight; // plot dimensions
-	private double xMin=0, xMax=1; // x range
 	
 	private Display display;
 	private Shell shell;
 	private MyWindow window;
+	private Compounds compounds;
+	/*
 	public CompoundBinary substrate;
-	public CompoundBinary gasb, gaas, inas, insb;
-	public CompoundTernary layer, ternary1, ternary2;
+	public CompoundBinary[] binaries = new CompoundBinary[4];
+	public CompoundTernary[] ternaries = new CompoundTernary[2];
+	public CompoundQuaternary layer;
+	*/
 	public ILineSeries dataCBO, dataVBO, dataMargin;
-	double x;
 	
-	public MyPlot(Display display,Shell shell, MyWindow mywindow) {
+	public MyPlot(Display newdisplay,Shell newshell, MyWindow newmywindow, Compounds newcompounds) {
 
-		super(shell,SWT.NONE);
-		this.display = display;
-		this.shell = shell;
-		this.window = mywindow;
+		super(newshell,SWT.NONE);
+		display = newdisplay;
+		shell = newshell;
+		window = newmywindow;
+		compounds = newcompounds;
 		
-		this.substrate = new CompoundBinary(0);
-		gasb = new CompoundBinary(2);
-		gaas = new CompoundBinary(0);
-		inas = new CompoundBinary(1);
-		insb = new CompoundBinary(3);
-		this.layer = new CompoundTernary(substrate, gasb, -1.06, 1.25);
-		ternary1 = new CompoundTernary(gaas, inas);
-		ternary2 = new CompoundTernary(gasb, insb);
-		
-		
-		dataCBO = (ILineSeries) this.getSeriesSet().createSeries(SeriesType.LINE, "CBO");
-		dataCBO.setXSeries(new double[]{0.1, 0.4, 0.4001, 0.8, 0.8001, 1.0});
-		dataCBO.setYSeries(new double[]{substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap, layer.valueVBO(x)+layer.valueBandgap(x), layer.valueVBO(x)+layer.valueBandgap(x), substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap});
+		dataCBO = (ILineSeries) getSeriesSet().createSeries(SeriesType.LINE, "CBO");
+		dataVBO =(ILineSeries) getSeriesSet().createSeries(SeriesType.LINE, "VBO");
 		dataCBO.setLineWidth(2);
-		dataCBO.setLineColor(this.display.getSystemColor(SWT.COLOR_RED));
+		dataVBO.setLineWidth(2);	
+		dataCBO.setLineColor(display.getSystemColor(SWT.COLOR_RED));
 		dataCBO.setSymbolType(PlotSymbolType.NONE);
-		
-		System.out.println(this.getPlotArea().toControl(4, 4));
-		x = 0.5;
-		this.setSize(this.shell.getSize().x-40,400);
-		this.dataVBO =(ILineSeries) this.getSeriesSet().createSeries(SeriesType.LINE, "VBO");
 		dataVBO.setSymbolType(PlotSymbolType.NONE);
-		dataVBO.setLineWidth(2);
-		dataVBO.setXSeries(new double[]{0.1, 0.4, 0.4001, 0.8, 0.8001, 1.0});
-		dataVBO.setYSeries(new double[]{substrate.VBO, substrate.VBO, layer.valueVBO(x), layer.valueVBO(x), substrate.VBO, substrate.VBO});
-		this.getAxisSet().adjustRange();
 		
-		this.getLegend().setVisible(false);
-		this.getTitle().setText("");
-		this.getAxisSet().getXAxis(0).getTitle().setText("x [A]");
-		this.getAxisSet().getYAxis(0).getTitle().setText("energy [eV]");
-		this.replot();
-	}
-	
-	void setComp(double x) {
-		this.x = x;
+		setSize(shell.getSize().x-40,400);
+
+		
+		getLegend().setVisible(false);
+		getTitle().setText("");
+		getAxisSet().getXAxis(0).getTitle().setText("x [A]");
+		getAxisSet().getYAxis(0).getTitle().setText("energy [eV]");
+		resetComp();
+		resetWidth();
 	}
 	
 	void resetComp() {
-		double Xbin1 = window.getComp(1) / Math.pow(10, 2);
-		System.out.println(Xbin1);
-		double Xbin3 = window.getComp(3) / Math.pow(10, 2);
-		System.out.println(Xbin3);
-		double Xter1 = window.getComp(5) / Math.pow(10, 2);
-		System.out.println(Xter1);
-		double qwVBO = (1-Xter1)*ternary1.valueVBO(Xbin1) + Xter1*ternary2.valueVBO(Xbin3);
-		double qwBandgap = (1-Xter1)*ternary1.valueBandgap(Xbin1) + Xter1*ternary2.valueBandgap(Xbin3);
-		double[] tableVBO = new double[]{substrate.VBO, substrate.VBO, qwVBO, qwVBO, substrate.VBO, substrate.VBO};
-		double[] tableCBO = new double[]{substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap, qwVBO+qwBandgap, qwVBO+qwBandgap, substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap};
-		dataVBO.setYSeries(tableVBO);
-		dataCBO.setYSeries(tableCBO);
-		margin(tableVBO, tableCBO);
+		double Xbin1 = window.getComp(1);
+		double Xbin3 = window.getComp(3);
+		double Xter1 = window.getComp(5);
+		compounds.ternaries[0].setXbinary1(Xbin1);
+		compounds.ternaries[1].setXbinary1(Xbin3);
+		compounds.layer.setXternary1(Xter1);
+		replot();
 	}
 	
 	void replot() {
-		double[] tableVBO = new double[]{substrate.VBO, substrate.VBO, layer.valueVBO(x), layer.valueVBO(x), substrate.VBO, substrate.VBO};
-		double[] tableCBO = new double[]{substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap, layer.valueVBO(x)+layer.valueBandgap(x), layer.valueVBO(x)+layer.valueBandgap(x), substrate.VBO+substrate.bandgap, substrate.VBO+substrate.bandgap};
+		double[] tableVBO = new double[]{compounds.substrate.VBO, compounds.substrate.VBO, compounds.layer.VBO(), compounds.layer.VBO(), compounds.substrate.VBO, compounds.substrate.VBO};
+		double[] tableCBO = new double[]{compounds.substrate.VBO+compounds.substrate.bandgap, compounds.substrate.VBO+compounds.substrate.bandgap, compounds.layer.VBO()+compounds.layer.bandgap(), compounds.layer.VBO()+compounds.layer.bandgap(), compounds.substrate.VBO+compounds.substrate.bandgap, compounds.substrate.VBO+compounds.substrate.bandgap};
 		dataVBO.setYSeries(tableVBO);
 		dataCBO.setYSeries(tableCBO);
 		margin(tableVBO, tableCBO);
 	}
 	
+	void resetWidth() {
+		double widthLeft = window.getWidth(0);
+		double widthQw = window.getWidth(1);
+		double widthRight = window.getWidth(2);
+		double sum = widthLeft + widthQw + widthRight;
+		dataVBO.setXSeries(new double[]{0.0, widthLeft/sum, widthLeft/sum, (widthLeft+widthQw)/sum, (widthLeft+widthQw)/sum, 1.0});
+		dataCBO.setXSeries(new double[]{0.0, widthLeft/sum, widthLeft/sum, (widthLeft+widthQw)/sum, (widthLeft+widthQw)/sum, 1.0});
+		getAxisSet().adjustRange();
+		redraw();
+		
+	}
 	
 	// setting the default margin as 0.1
 	void margin(double[] tableVBO, double[] tableCBO) {
@@ -111,8 +106,12 @@ public class MyPlot extends Chart {
 		dataMargin.setYSeries(new double[]{Math.min(tableVBO[0]-marginValue, tableVBO[3]-marginValue), Math.max(tableCBO[0]+marginValue, tableCBO[3]+marginValue)});
 		dataMargin.setLineStyle(LineStyle.NONE);
 		dataMargin.setSymbolType(PlotSymbolType.NONE);	
-		this.getAxisSet().getYAxis(0).adjustRange();
-		this.redraw();		
+		getAxisSet().getYAxis(0).adjustRange();
+		redraw();		
 	}
-
+	
+	
+	
+	
+	
 }

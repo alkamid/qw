@@ -1,3 +1,22 @@
+/* Copyright 2011 Adam Klimont a.k.a. alkamid
+This file is part of Qw.
+
+Qw is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Qw is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Qw.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.text.DecimalFormat;
+import java.util.Arrays;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
@@ -14,8 +33,8 @@ public class MyWindow {
 
 	public Display display;
 	public Shell shell;
+	public Compounds compounds;
 	
-	private Spinner setX;
 	private Spinner[] setXBinary = new Spinner[4];
 	private Spinner[] setEgBinary = new Spinner[4];
 	private Spinner[] setLatticeBinary = new Spinner[4];
@@ -26,79 +45,83 @@ public class MyWindow {
 	private Spinner[] setC12Binary = new Spinner[4];
 	private Spinner[] setBBinary = new Spinner[4];
 	private Spinner[] setXTernary = new Spinner[4];
+	private Spinner[] setWidth = new Spinner[4];
+	private Spinner[] setTernaryBowingVBO = new Spinner[4];
+	private Spinner[] setTernaryBowingE = new Spinner[4];
 	double x;
 	
 	private Combo[] chooseBinary = new Combo[4];
 	private Combo chooseSubstrate;
 	private String [] binaryOptions, substrateOptions;
-	private Label labelNotChosen;
+	private Label [] compTab = new Label[4];
 	
-	private ILineSeries dataVBO, dataCBO;
 	private MyPlot plotMain;
 	
 	private int sc;
 	
 	public MyWindow(){
 		
-		this.display = new Display();
-		this.shell = new Shell(display);
+		display = new Display();
+		shell = new Shell(display);
 		
-		this.shell.setText("Plot");
-		this.shell.setSize(980,800); this.shell.setLocation(20, 20); //setting window size and location
-		this.shell.open();
-		
-		this.plotMain = new MyPlot(this.display, this.shell, this);
-		
-		setX = new Spinner(this.shell, SWT.NONE);
-		setX.setDigits(2); // allow 2 decimal places
-		setX.setMinimum(0); // set the minimum value to 0.00
-		setX.setMaximum(100); // set the maximum value to 1.00
-		setX.setIncrement(1); // set the increment value to 0.01
-		setX.setSelection(50); // set the selection to 0.5
-		setX.setBounds(500,500,50,20);
+		shell.setText("Plot");
+		shell.setSize(980,800); this.shell.setLocation(20, 20); //setting window size and location
+		shell.open();
 		
 		binaryOptions = new String [] {"GaAs", "InAs", "GaSb", "InSb", "Custom"};
-		substrateOptions = new String [] {"InP", "Custom"};
+		substrateOptions = new String [] {"GaAs", "InAs", "GaSb", "InSb", "InP", "Custom"};
 		
 		addLeftLabels();
 		addTernaryLabels();
 		
 		chooseSubstrate = new Combo(shell, SWT.READ_ONLY);
 		chooseSubstrate.setItems(substrateOptions);
-		chooseSubstrate.setBounds(500, 400, 70, 20);
+		chooseSubstrate.select(4);
+		chooseSubstrate.setBounds(640, 400, 70, 20);
 		
-		setXTernary[0] = new Spinner(shell, SWT.NONE);
-		XSpinner(setXTernary[0]);
-		setXTernary[0].setBounds(570, 435, 70, 20);
-		
-		setXTernary[1] = new Spinner(shell, SWT.NONE);
-		XSpinner(setXTernary[1]);
-		setXTernary[1].setBounds(640, 435, 70, 20);
-		
-
-		setXTernary[0].addSelectionListener(new SelectionAdapter() {
+		chooseSubstrate.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				int selection = setXTernary[0].getSelection();
-				int digits = setXTernary[0].getDigits();
-				setXTernary[1].setSelection(100-selection);
-				plotMain.resetComp();
+				compounds.setSubstrate(chooseSubstrate.getSelectionIndex());
+				plotMain.replot();
 			}
 		});
 		
-		setXTernary[1].addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				int selection = setXTernary[1].getSelection();
-				int digits = setXTernary[1].getDigits();
-				setXTernary[0].setSelection(100-selection);
-				plotMain.resetComp();
-			}
-		});
+		//setting spinners to control ternary composition and bowing parameters
+		int xpos = 450;
+		for (int i =0; i<2; i++) {
+			setXTernary[i] = new Spinner(shell, SWT.NONE);
+			XSpinner(setXTernary[i]);
+			setXTernary[i].setBounds(xpos, 435, 70, 20);
+			
+			setTernaryBowingVBO[i] = new Spinner(shell, SWT.NONE);
+			BowingSpinner(setTernaryBowingVBO[i]);
+			setTernaryBowingVBO[i].setBounds(xpos, 470, 70, 20);			
+			
+			xpos += 70;
+		}
+		
+		//setting spinners to control qw width [0] - left barrier, [1] - qw, [2] - right barrier
+		xpos = 600;
+		for (int i = 0; i<3; i++) {
+			setWidth[i] = new Spinner(shell, SWT.NONE);
+			WidthSpinner(setWidth[i]);
+			setWidth[i].setBounds(xpos, 470, 70, 20);
+			if (i == 1)
+				setWidth[i].setSelection(150);
+			else
+				setWidth[i].setSelection(2000);
+			xpos += 70;
+			
+			//listener - when spinners are changed, recalculate the width
+			setWidth[i].addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					plotMain.resetWidth();
+				}
+			});
+		}
 		
 		
-		
-		int xpos = 120;
-		
-		
+		xpos = 120;
 		for (sc=0; sc<4; sc++) {
 			//creating choice lists for binary compounds
 			chooseBinary[sc] = new Combo(shell, SWT.READ_ONLY);
@@ -146,84 +169,78 @@ public class MyWindow {
 			setBBinary[sc].setBounds(xpos, 715, 70, 20);
 			
 			xpos += 80;
+		}
+		
+		compounds = new Compounds(this);
+		xpos = 120;
+		for (int sc=0; sc<4; sc++) {
 			
-			final int localXpos = xpos;
 			final int localSc = sc;
+			setXBinary[localSc] = new Spinner(shell, SWT.NONE);
+			XSpinner(setXBinary[localSc]);
+			setXBinary[localSc].setBounds(xpos, 435, 70, 20);
+			
+			
 			//loading config from a class (todo: config from a file)
 			chooseBinary[localSc].addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					int selection = chooseBinary[localSc].getSelectionIndex();
-					CompoundBinary binary = new CompoundBinary(selection);
-					int egInt = (int) (binary.bandgap*10000);
-					int latticeInt = (int) (binary.latticeConstant*100000);
-					int vboInt = (int) (binary.VBO*10000);
-					int acInt = (int) (binary.ac*100);
-					int avInt = (int) (binary.av*100);
-					int c11Int = (int) (binary.c11*10);
-					int c12Int = (int) (binary.c12*10);
-					int bInt = (int) (binary.deformationPotential*100);
-					setEgBinary[localSc].setSelection(egInt);
-					setLatticeBinary[localSc].setSelection(latticeInt);
-					setVBOBinary[localSc].setSelection(vboInt);
-					setAcBinary[localSc].setSelection(acInt);
-					setAvBinary[localSc].setSelection(avInt);
-					setC11Binary[localSc].setSelection(c11Int);
-					setC12Binary[localSc].setSelection(c12Int);
-					setBBinary[localSc].setSelection(bInt);
-					
+					loadConf(localSc);
+					compounds.setBinary(localSc, selection);
+					plotMain.replot();
+					plotMain.resetComp();
 				}
 			});
+
+			chooseBinary[localSc].select(localSc);
+			loadConf(sc);
 			
-			//creating spinners for choosing the composition of each binary compound only if all of them were selected
-			if (chooseBinary[0].getSelectionIndex() != -1 && chooseBinary[1].getSelectionIndex() != -1 && chooseBinary[2].getSelectionIndex() != -1 && chooseBinary[3].getSelectionIndex() != -1) {
-			setXBinary[localSc] = new Spinner(shell, SWT.NONE);
-			XSpinner(setXBinary[localSc]);
-			setXBinary[localSc].setBounds(localXpos, 435, 70, 20);
-			
+			xpos += 80;
+		}
+		
+		addOneLabels();
+		
+		for (sc=0; sc<4; sc++) {
+			final int localSc = sc;
 			setXBinary[localSc].addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					int selection = setXBinary[localSc].getSelection();
-					int digits = setXBinary[localSc].getDigits();
 					switch(localSc) {
 					case 0:	setXBinary[1].setSelection(100-selection);	break;
 					case 1: setXBinary[0].setSelection(100-selection);	break;
 					case 2: setXBinary[3].setSelection(100-selection);	break;
 					case 3: setXBinary[2].setSelection(100-selection);	break;
 					}
+					refreshOneLabels(compTab);
 					plotMain.resetComp();
+					
 				}
 			});
-			}
-			
 		}
 		
-		
-		if (chooseBinary[0].getSelectionIndex() == -1 || chooseBinary[1].getSelectionIndex() == -1 || chooseBinary[2].getSelectionIndex() == -1 || chooseBinary[3].getSelectionIndex() == -1) {
-			labelNotChosen = new Label(shell, SWT.HORIZONTAL);
-			labelNotChosen.setBounds(120, 435, 350, 20);
-			labelNotChosen.setText("Choose all binary compounds to set their composition");
-		}
-		else {
-			
-		}
-		
-		this.setX.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				int selection = MyWindow.this.setX.getSelection();
-				int digits = MyWindow.this.setX.getDigits();
-				System.out.println("Selection is "+(selection / Math.pow(10, digits)));
-				MyWindow.this.plotMain.setComp(selection / Math.pow(10, digits));
-				MyWindow.this.plotMain.replot();
-			}
-		});
+		for (int i=0; i<2; i++) {
+			final int localI = i;
+			setXTernary[i].addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					int selection = setXTernary[localI].getSelection();
+					if (localI == 0)
+						setXTernary[1].setSelection(100-selection);
+					else
+						setXTernary[0].setSelection(100-selection);
+					plotMain.resetComp();
+					refreshOneLabels(compTab);				
+				}
+			});
+		}		
 		
 		
+		plotMain = new MyPlot(display, shell, this, compounds);
+	
 		while (!shell.isDisposed ()) {
 		if (!display.readAndDispatch ()) display.sleep ();
 		}
 		display.dispose();
-		
-		//this.SpinnerParemeters()
+	
 		
 		}
 
@@ -278,6 +295,20 @@ public class MyWindow {
 		spinner.setIncrement(1); // set the increment value to 0.0001
 	}
 	
+	private void WidthSpinner(Spinner spinner) {
+		spinner.setDigits(1); // allow 1 decimal place
+		spinner.setMinimum(1); // set the minimum value to 1.0
+		spinner.setMaximum(100000); // set the maximum value to 10000
+		spinner.setIncrement(1); // set the increment value to 0.0001
+	}
+	
+	private void BowingSpinner(Spinner spinner) {
+		spinner.setDigits(3); // allow 1 decimal place
+		spinner.setMinimum(-5000); // set the minimum value to 1.0
+		spinner.setMaximum(5000); // set the maximum value to 10000
+		spinner.setIncrement(1); // set the increment value to 0.0001
+	}
+	
 	//a method to add labels (leftmost column: Eg, a, VBO etc.)
 	private void addLeftLabels() {
 
@@ -297,7 +328,7 @@ public class MyWindow {
 
 		String[] labelString = new String [] {"Ternary1", "Ternary2"};
 		Label labelsTab[] = new Label[2];
-		int xpos = 570;
+		int xpos = 450;
 		for (int i = 0; i<2; i++) {
 		labelsTab[i] = new Label(shell, SWT.HORIZONTAL);
 		labelsTab[i].setBounds(xpos, 400, 70, 20);
@@ -306,18 +337,84 @@ public class MyWindow {
 		}
 	}
 	
+	private void addOneLabels() {
+		int ypos = 550;
+
+		for (int i = 0; i<4; i++) {
+			compTab[i] = new Label(shell, SWT.HORIZONTAL);
+			compTab[i].setBounds(450, ypos, 70, 20);
+			ypos += 50;
+		}
+		refreshOneLabels(compTab);
+		
+	}
+	
+	private void refreshOneLabels(Label compTab[]) {
+		String[] labelString = new String [4];
+		labelString[0] = Double.toString(roundTwoDecimals(((double) setXBinary[0].getSelection()/100* (double) setXTernary[0].getSelection()/100)+(double) setXBinary[2].getSelection()/100*(double) setXTernary[1].getSelection()/100));
+		labelString[1] = Double.toString(roundTwoDecimals(((double) setXBinary[1].getSelection()/100* (double) setXTernary[0].getSelection()/100)+(double) setXBinary[3].getSelection()/100*(double) setXTernary[1].getSelection()/100));
+		labelString[2] = Double.toString(roundTwoDecimals((double) setXTernary[0].getSelection()/100));
+		labelString[3] = Double.toString(roundTwoDecimals((double) setXTernary[1].getSelection()/100));
+		
+		for (int i = 0; i<4; i++) {
+			compTab[i].setText(labelString[i]);
+		}
+	}
+	
 	public double getComp(int which) {
-		if (which >0 && which < 5) {
-		return setXBinary[which].getSelection();
-	}
-		else if (which == 5) {
-			return setXTernary[0].getSelection();
-		}
-		else if (which == 6) {
-			return setXTernary[1].getSelection();
-		}
-		else {
+		if (which >0 && which < 5)
+			return setXBinary[which].getSelection() / Math.pow(10, setXBinary[which].getDigits());
+		else if (which == 5 || which == 6)
+			return setXTernary[which-5].getSelection() / Math.pow(10, setXBinary[which-5].getDigits());
+		else
 			return 0;
-		}
 	}
+	
+	public double getWidth(int which) {
+		if (which >=0 && which < 3) {
+			if (which == 1)
+				return setWidth[which].getSelection() / Math.pow(10, setXBinary[which].getDigits()-1); //layer's width is multiplied by 10 to make it visible
+			else
+				return setWidth[which].getSelection() / Math.pow(10, setXBinary[which].getDigits());
+		}
+		else
+			return 0;
+	}
+	
+	private void loadConf(int localSc) {
+		int egInt = (int) (compounds.binaries[localSc].getBandgap() * Math.pow(10, setXBinary[localSc].getDigits()));
+		int latticeInt = (int) (compounds.binaries[localSc].getLatticeConstant() * Math.pow(10, setLatticeBinary[localSc].getDigits()));
+		int vboInt = (int) (compounds.binaries[localSc].getVBO() * Math.pow(10, setVBOBinary[localSc].getDigits()));
+		int acInt = (int) (compounds.binaries[localSc].getAc() * Math.pow(10, setAcBinary[localSc].getDigits()));
+		int avInt = (int) (compounds.binaries[localSc].getAv() * Math.pow(10, setAvBinary[localSc].getDigits()));
+		int c11Int = (int) (compounds.binaries[localSc].getC11() * Math.pow(10, setC11Binary[localSc].getDigits()));
+		int c12Int = (int) (compounds.binaries[localSc].getC12() * Math.pow(10, setC12Binary[localSc].getDigits()));
+		int bInt = (int) (compounds.binaries[localSc].getDeformationPotential() * Math.pow(10, setBBinary[localSc].getDigits()));
+		setEgBinary[localSc].setSelection(egInt);
+		setLatticeBinary[localSc].setSelection(latticeInt);
+		setVBOBinary[localSc].setSelection(vboInt);
+		setAcBinary[localSc].setSelection(acInt);
+		setAvBinary[localSc].setSelection(avInt);
+		setC11Binary[localSc].setSelection(c11Int);
+		setC12Binary[localSc].setSelection(c12Int);
+		setBBinary[localSc].setSelection(bInt);
+	}
+	
+	double roundTwoDecimals(double d) {
+    	DecimalFormat twoDForm = new DecimalFormat("#.##");
+	return Double.valueOf(twoDForm.format(d));
+	}
+	
+	public int getChosenBinary(int which) {
+		return chooseBinary[which].getSelectionIndex();
+	}
+	
+	public int getChosenSubstrate() {
+		return chooseSubstrate.getSelectionIndex();
+	}
+	
+	private void resetSpinner(Spinner spinner) {
+		spinner.setSelection(5000);
+	}
+	
 }
