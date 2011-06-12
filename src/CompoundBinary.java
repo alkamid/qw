@@ -18,9 +18,9 @@ along with Qw.  If not, see <http://www.gnu.org/licenses/>.
 public class CompoundBinary {
 
 	public String label, label1, label2;
-	public double bandgap, latticeConstant, VBO, ac, av, c11, c12, deformationPotential;
+	public double bandgap, latticeConstant, VBO, ac, av, c11, c12, deformationPotential, emass, hhmass, lhmass;
 	
-	public CompoundBinary(String label1, double bandgap1, double latticeConstant1, double VBO1, double ac1, double av1, double c111, double c121, double deformationPotential1) {
+	public CompoundBinary(String label1, double bandgap1, double latticeConstant1, double VBO1, double ac1, double av1, double c111, double c121, double deformationPotential1, double emass1, double hhmass1, double lhmass1) {
 	
 	label = label1;
 	bandgap = bandgap1;
@@ -31,6 +31,9 @@ public class CompoundBinary {
 	c11 = c111;
 	c12 = c121;
 	deformationPotential = deformationPotential1;
+	emass = emass1;
+	hhmass = hhmass1;
+	lhmass = lhmass1;
 	
 	}
 	
@@ -48,6 +51,9 @@ public class CompoundBinary {
 				c11 = 1221;
 				c12 = 566;
 				deformationPotential = -2.0;
+				emass = 0.067;
+				hhmass = 0.45;
+				lhmass = 0.074;
 			}
 			break;
 			case 1: {
@@ -62,6 +68,9 @@ public class CompoundBinary {
 				c11 = 832.9;
 				c12 = 452.6;
 				deformationPotential = -1.8;
+				emass = 0.023;
+				hhmass = 0.41;
+				lhmass = 0.028;
 			}
 			break;
 			case 2: {
@@ -76,6 +85,9 @@ public class CompoundBinary {
 				c11 = 884.2;
 				c12 = 402.6;
 				deformationPotential = -2.0;
+				emass = 0.046;
+				hhmass = 0.39;
+				lhmass = 0.046;
 			}
 			break;
 			case 3: {
@@ -90,6 +102,9 @@ public class CompoundBinary {
 				c11 = 684.7;
 				c12 = 373.5;
 				deformationPotential = -2.0;
+				emass = 0.016;
+				hhmass = 0.18;
+				lhmass = 0.016;
 			}
 			break;
 			case 4: {
@@ -104,6 +119,9 @@ public class CompoundBinary {
 				c11 = 1011;
 				c12 = 561;
 				deformationPotential = -2.0;
+				emass = 0.077;
+				hhmass = 0.60;
+				lhmass = 0.12;
 			}
 		
 		}
@@ -147,6 +165,18 @@ public class CompoundBinary {
 		deformationPotential = newDeformationPotential;
 	}
 	
+	public void setEmass(double newEmass) {
+		emass = newEmass;
+	}
+	
+	public void setHhmass(double newHhmass) {
+		hhmass = newHhmass;
+	}
+	
+	public void setLhmass(double newLhmass) {
+		lhmass = newLhmass;
+	}
+	
 	public String getlabel() {
 		return label;
 	}
@@ -181,5 +211,17 @@ public class CompoundBinary {
 	
 	public double getDeformationPotential() {
 		return deformationPotential;
+	}
+	
+	public double getEmass() {
+		return emass;
+	}
+	
+	public double getHHmass() {
+		return hhmass;
+	}
+	
+	public double getLHmass() {
+		return lhmass;
 	}
 }

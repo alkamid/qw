@@ -19,6 +19,7 @@ public class CompoundTernary {
 
 	private CompoundBinary binary1, binary2;
 	private double bowingBandgap, bowingVBO, xbinary1, xbinary2;
+	double VBO, bandgap, emass, lhmass, hhmass, av, ac, c11, c12, latticeConstant, deformationPotential;
 	public String label;
 	
 	public CompoundTernary(CompoundBinary bin1, CompoundBinary bin2, double bowingBandgapTemp, double bowingVBOTemp) {
@@ -29,6 +30,7 @@ public class CompoundTernary {
 		bowingBandgap = bowingBandgapTemp;
 		bowingVBO = bowingVBOTemp;
 		label = "";
+		resetParameters();
 		
 	}
 	
@@ -52,15 +54,55 @@ public class CompoundTernary {
 			bowingBandgap = 0;
 			bowingVBO = 0;
 		}
+		resetParameters();
 	}
 	
-	public double VBO() {
-		return xbinary1*binary1.getVBO()+xbinary2*binary2.getVBO()-bowingVBO*xbinary1*xbinary2;
+	public void setVBO() {
+		VBO = xbinary1*binary1.getVBO()+xbinary2*binary2.getVBO()-bowingVBO*xbinary1*xbinary2;
 	}
-	public double bandgap() {
-		return xbinary1*binary1.getBandgap()+xbinary2*binary2.getBandgap()-bowingBandgap*xbinary1*xbinary2;
+	public void setBandgap() {
+		bandgap = xbinary1*binary1.getBandgap()+xbinary2*binary2.getBandgap()-bowingBandgap*xbinary1*xbinary2;
 	}
-	
+	public void setEmass() {
+		emass = xbinary1*binary1.getEmass()+xbinary2*binary2.getEmass();
+	}
+	public void setHHmass() {
+		hhmass = xbinary1*binary1.getHHmass()+xbinary2*binary2.getHHmass();
+	}
+	public void setLHmass() {
+		lhmass = xbinary1*binary1.getLHmass()+xbinary2*binary2.getLHmass();
+	}
+	public void setAv() {
+		av = xbinary1*binary1.getAv()+xbinary2*binary2.getAv();
+	}
+	public void setAc() {
+		ac = xbinary1*binary1.getAc()+xbinary2*binary2.getAc();
+	}
+	public void setC12() {
+		c12 = xbinary1*binary1.getC12()+xbinary2*binary2.getC12();
+	}
+	public void setC11() {
+		c11 = xbinary1*binary1.getC11()+xbinary2*binary2.getC11();
+	}
+	public void setDeformationPotential() {
+		deformationPotential = xbinary1*binary1.getDeformationPotential()+xbinary2*binary2.getDeformationPotential();
+	}
+	public void setLatticeConstant() {
+		latticeConstant = xbinary1*binary1.getLatticeConstant()+xbinary2*binary2.getLatticeConstant();
+	}
+	public void resetParameters() {
+		setVBO();
+		setBandgap();
+		setEmass();
+		setHHmass();
+		setLHmass();
+		setAv();
+		setAc();
+		setC12();
+		setC11();
+		setDeformationPotential();
+		setLatticeConstant();
+	}
 	
 	//getters and setters
 	public void setBinary1(CompoundBinary newBinary1) {
