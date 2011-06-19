@@ -150,8 +150,8 @@ public class CompoundTernary {
 		return bowingBandgap;
 	}
 	
-	public String getLayer() {
-		return getLayer();
+	public String getLabel() {
+		return label;
 	}
 	public double getXbinary1 () {
 		return xbinary1;

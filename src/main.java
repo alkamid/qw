@@ -1,4 +1,3 @@
-import java.util.Arrays;
 
 /* Copyright 2011 Adam Klimont a.k.a. alkamid
 This file is part of Qw.

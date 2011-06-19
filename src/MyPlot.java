@@ -15,9 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Qw.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.text.DecimalFormat;
-import java.util.Arrays;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -65,7 +62,7 @@ public class MyPlot extends Chart {
 		dataVec.setLineWidth(2);
 		dataVec.setSymbolType(PlotSymbolType.NONE);
 		
-		setSize(shell.getSize().x-40,400);
+		setSize(shell.getSize().x-40,350);
 
 		
 		getLegend().setVisible(false);
@@ -196,7 +193,7 @@ public class MyPlot extends Chart {
 				dataEigenvaluesE[i].setXSeries(new double[]{widthBarrier/width, (widthBarrier+widthQW)/width});
 				dataEigenvaluesE[i].setYSeries(new double[]{matrixE.eigenvalues[i], matrixE.eigenvalues[i]});
 				dataEigenvaluesE[i].setSymbolType(PlotSymbolType.NONE);
-				window.output.insert("\n" + Double.toString(roundFourDecimals(matrixE.eigenvalues[i])) + " [eV]");
+				window.output.insert("\n" + Double.toString(round(matrixE.eigenvalues[i],4)) + " [eV]");
 			}
 			
 			window.output.insert("\nHeavy hole energy states:");
@@ -207,7 +204,7 @@ public class MyPlot extends Chart {
 				dataEigenvaluesHH[i].setXSeries(new double[]{widthBarrier/width, (widthBarrier+widthQW)/width});
 				dataEigenvaluesHH[i].setYSeries(new double[]{matrixHH.eigenvalues[i], matrixHH.eigenvalues[i]});
 				dataEigenvaluesHH[i].setSymbolType(PlotSymbolType.NONE);
-				window.output.insert("\n" + Double.toString(roundFourDecimals(matrixHH.eigenvalues[i])) + " [eV]");
+				window.output.insert("\n" + Double.toString(round(matrixHH.eigenvalues[i],4)) + " [eV]");
 			}
 			
 			window.output.insert("\nLight hole energy states:");
@@ -219,12 +216,12 @@ public class MyPlot extends Chart {
 				dataEigenvaluesLH[i].setYSeries(new double[]{matrixLH.eigenvalues[i], matrixLH.eigenvalues[i]});
 				dataEigenvaluesLH[i].setSymbolType(PlotSymbolType.NONE);
 				dataEigenvaluesLH[i].setLineColor(display.getSystemColor(SWT.COLOR_GREEN));
-				window.output.insert("\n" + Double.toString(roundFourDecimals(matrixLH.eigenvalues[i])) + " [eV]");
+				window.output.insert("\n" + Double.toString(round(matrixLH.eigenvalues[i],4)) + " [eV]");
 			}
 			
-			window.output.insert("\nLowest energy gap: " + Double.toString(matrixE.eigenvalues[0]-Math.max(matrixHH.eigenvalues[0],matrixLH.eigenvalues[0])));
+			window.output.insert("\nLowest energy gap: " + Double.toString(round(matrixE.eigenvalues[0]-Math.max(matrixHH.eigenvalues[0],matrixLH.eigenvalues[0]),4)));
 			
-			window.output.insert("\nStrain: " + Double.toString(roundFourDecimals((compounds.layer.latticeConstant-compounds.substrate.latticeConstant)/compounds.layer.latticeConstant*100)) + "%");
+			window.output.insert("\nStrain: " + Double.toString(Math.abs(round((compounds.layer.latticeConstant-compounds.substrate.latticeConstant)/compounds.layer.latticeConstant*100,4))) + "%");
 			
 			redraw();
 		}
@@ -287,9 +284,8 @@ public class MyPlot extends Chart {
 		redraw();
 	}
 	
-	double roundFourDecimals(double d) {
-    	DecimalFormat fourDForm = new DecimalFormat("#.####");
-	return Double.valueOf(fourDForm.format(d));
+	double round(double d, int i) {
+		return (double)((int) (d * Math.pow(10,i)))/Math.pow(10, i);
 	}
 	
 	

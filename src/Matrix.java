@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import org.netlib.lapack.*;
 import org.netlib.util.intW;
 

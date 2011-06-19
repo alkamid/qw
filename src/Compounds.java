@@ -1,6 +1,3 @@
-import java.text.DecimalFormat;
-import java.util.Arrays;
-
 /* Copyright 2011 Adam Klimont a.k.a. alkamid
 This file is part of Qw.
 
@@ -35,7 +32,7 @@ public class Compounds {
 			binaries[i] = new CompoundBinary(i);
 		
 		//set the substrate (user's choice through the interface)
-		substrate = new CompoundBinary(window.getChosenSubstrate());
+		substrate = new CompoundBinary(4);
 		
 		//set ternaries automatically (based on chosen binaries)
 		ternaries[0] = new CompoundTernary(binaries[0], binaries[1]);
@@ -43,8 +40,7 @@ public class Compounds {
 		
 		//basing on ternaries, set the quaternary
 		layer = new CompoundQuaternary(ternaries[0], ternaries[1], substrate);
-		
-		
+			
 	}
 	
 	void setBinary(int which, int selection) {
@@ -70,8 +66,6 @@ public class Compounds {
 		CompoundTernary ter2 = new CompoundTernary(bin3, bin4);
 		CompoundBinary sub = new CompoundBinary(substrate.label, substrate.bandgap, substrate.latticeConstant, substrate.VBO, substrate.ac, substrate.av, substrate.c11, substrate.c12, substrate.deformationPotential, substrate.emass, substrate.hhmass, substrate.lhmass);
 		CompoundQuaternary lay = new CompoundQuaternary(ter1, ter2, sub);
-		double[] params = new double[3];
-		double minimum = 100;
 		double test, band;
 		int indicator = 0;
 		window.output.insert("\n\n\n\na(l)-a(s)\t| Eg\t\t| x1\t\t| x2\t\t| x3");
@@ -86,7 +80,7 @@ public class Compounds {
 					test = Math.abs(lay.latticeConstant-sub.latticeConstant);
 					band = lay.EE-lay.EHH;
 					if (test<strain && band <=energy && layer.EHH+layer.bandgap < sub.VBO+sub.bandgap) {
-						window.output.insert("\n" + Double.toString(roundFiveDecimals(test)) + " \t| " + Double.toString(roundFourDecimals(band)) + " \t| " + Double.toString(roundTwoDecimals(i)) + " \t| " + Double.toString(roundTwoDecimals(j))+ " \t| " + Double.toString(roundTwoDecimals(k)));
+						window.output.insert("\n" + Double.toString(round(test,5)) + " \t| " + Double.toString(round(band,4)) + " \t| " + Double.toString(round(i,2)) + " \t| " + Double.toString(round(j,2))+ " \t| " + Double.toString(round(k,2)));
 						indicator = 1;
 					}
 				}
@@ -97,19 +91,14 @@ public class Compounds {
 		
 	}
 	
-	double roundTwoDecimals(double d) {
-    	DecimalFormat DForm = new DecimalFormat("#.##");
-	return Double.valueOf(DForm.format(d));
+	double round(double d, int i) {
+		return (double)((int) (d * Math.pow(10,i)))/Math.pow(10, i);
 	}
 	
-	double roundFiveDecimals(double d) {
-    	DecimalFormat DForm = new DecimalFormat("#.#####");
-	return Double.valueOf(DForm.format(d));
-	}
-	
+	/* just to remember the old way
 	double roundFourDecimals(double d) {
     	DecimalFormat DForm = new DecimalFormat("#.####");
 	return Double.valueOf(DForm.format(d));
-	}
+	}*/
 
 }

@@ -15,15 +15,19 @@ You should have received a copy of the GNU General Public License
 along with Qw.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 import java.text.DecimalFormat;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.*;
 
@@ -35,30 +39,36 @@ public class MyWindow {
 	public Shell shell;
 	public Compounds compounds;
 	
-	private Spinner[] setXBinary = new Spinner[4];
-	private Spinner[] setEgBinary = new Spinner[4];
-	private Spinner[] setLatticeBinary = new Spinner[4];
-	private Spinner[] setVBOBinary = new Spinner[4];
-	private Spinner[] setAcBinary = new Spinner[4];
-	private Spinner[] setAvBinary = new Spinner[4];
-	private Spinner[] setC11Binary = new Spinner[4];
-	private Spinner[] setC12Binary = new Spinner[4];
-	private Spinner[] setBBinary = new Spinner[4];
-	private Spinner[] setXTernary = new Spinner[4];
+	private Spinner[] setXBinary = new Spinner[5];
+	private Spinner[] setEgBinary = new Spinner[5];
+	private Spinner[] setLatticeBinary = new Spinner[5];
+	private Spinner[] setVBOBinary = new Spinner[5];
+	private Spinner[] setAcBinary = new Spinner[5];
+	private Spinner[] setAvBinary = new Spinner[5];
+	private Spinner[] setC11Binary = new Spinner[5];
+	private Spinner[] setC12Binary = new Spinner[5];
+	private Spinner[] setBBinary = new Spinner[5];
+	private Spinner[] setEMassBinary = new Spinner[5];
+	private Spinner[] setHHMassBinary = new Spinner[5];
+	private Spinner[] setLHMassBinary = new Spinner[5];	
+	private Spinner[] setXTernary = new Spinner[2];
 	private Spinner[] setWidth = new Spinner[2];
 	private Spinner[] setTernaryBowingVBO = new Spinner[2];
 	private Spinner[] setTernaryBowingE = new Spinner[2];
 	double x;
 	
-	private Combo[] chooseBinary = new Combo[4];
+	private Combo[] chooseBinary = new Combo[5];
 	private Combo choosePsiE, choosePsiHH, choosePsiLH;
-	private Combo chooseSubstrate;
-	private String [] binaryOptions, substrateOptions;
-	private Label [] compTab = new Label[4];
+	private String [] binaryOptions;
+	private Label [] compTab = new Label[5];
 	private Button eigenvaluesButton;
 	public Text output;
 	private Label labelWidth, labelSearchMinimumStrainA, labelSearchMinimumStrainEg;
 	private Label[] whichPsi = new Label[3];
+	private Composite compositeBasic, compositeMaterial;
+	private Label ternaryLabels[] = new Label[2];
+	private int xwidth;
+	
 	
 	private MyPlot plotMain;
 	
@@ -69,59 +79,59 @@ public class MyWindow {
 		display = new Display();
 		shell = new Shell(display);
 		
-		shell.setText("Plot");
-		shell.setSize(980,800); this.shell.setLocation(20, 20); //setting window size and location
+		shell.setText("qw");
+		shell.setSize(1000,750); this.shell.setLocation(20, 20); //setting window size and location
 		shell.open();
 		
-		binaryOptions = new String [] {"GaAs", "InAs", "GaSb", "InSb", "Custom"};
-		substrateOptions = new String [] {"GaAs", "InAs", "GaSb", "InSb", "InP", "Custom"};
+		binaryOptions = new String [] {"GaAs", "InAs", "GaSb", "InSb", "InP", "Custom"};		
 		
+		final TabFolder tabFolder = new TabFolder (shell, SWT.BORDER);
+		tabFolder.setLocation(15,350);
+		TabItem item = new TabItem (tabFolder, SWT.NONE);
+		item.setText ("Basic");
+		TabItem item1 = new TabItem (tabFolder, SWT.NONE);
+		item1.setText ("Material");
+		compositeBasic = new Composite (tabFolder, SWT.NONE);
+		compositeBasic.setSize(400, 450);
+		compositeMaterial = new Composite(tabFolder, SWT.NONE);
+		item.setControl(compositeBasic);
+		item1.setControl(compositeMaterial);
+
 		addLeftLabels();
+
 		
-		
-		Label substrateLayer = new Label(shell, SWT.HORIZONTAL);
-		substrateLayer.setBounds(450, 580, 70, 20);
-		substrateLayer.setText("Substrate:");
-		chooseSubstrate = new Combo(shell, SWT.READ_ONLY);
-		chooseSubstrate.setItems(substrateOptions);
-		chooseSubstrate.select(4);
-		chooseSubstrate.setBounds(450, 600, 70, 20);
-		
-		chooseSubstrate.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				compounds.setSubstrate(chooseSubstrate.getSelectionIndex());
-				plotMain.replot();
-			}
-		});
+		Label substrateLayer = new Label(compositeBasic, SWT.HORIZONTAL);
+		substrateLayer.setBounds(360, 33, 70, 20);
+		substrateLayer.setText("(substrate)");
 		
 		//setting spinners to control ternary composition and bowing parameters
-		int xpos = 450;
+		int xpos = 80;
 		for (int i =0; i<2; i++) {
-			setXTernary[i] = new Spinner(shell, SWT.NONE);
+			setXTernary[i] = new Spinner(compositeBasic, SWT.NONE);
 			XSpinner(setXTernary[i]);
-			setXTernary[i].setBounds(xpos, 435, 70, 20);
+			setXTernary[i].setBounds(xpos, 175, 70, 20);
 			/*
 			setTernaryBowingVBO[i] = new Spinner(shell, SWT.NONE);
 			BowingSpinner(setTernaryBowingVBO[i]);
 			setTernaryBowingVBO[i].setBounds(xpos, 470, 70, 20);			
 			*/
-			xpos += 70;
+			xpos += 160;
 		}
 		
 		//setting spinners to control qw width [0] - barrier (one side), [1] - qw
-		labelWidth = new Label(shell, SWT.HORIZONTAL);
-		labelWidth.setBounds(460, 470, 120, 20);
-		labelWidth.setText("barrier | well [nm]");
-		xpos = 450;
+		labelWidth = new Label(compositeBasic, SWT.HORIZONTAL);
+		labelWidth.setBounds(15, 210, 160, 20);
+		labelWidth.setText("barrier [nm] | well [nm]");
+		xpos = 15;
 		for (int i = 0; i<2; i++) {
-			setWidth[i] = new Spinner(shell, SWT.NONE);
+			setWidth[i] = new Spinner(compositeBasic, SWT.NONE);
 			WidthSpinner(setWidth[i]);
-			setWidth[i].setBounds(xpos, 500, 70, 20);
+			setWidth[i].setBounds(xpos, 230, 70, 20);
 			if (i == 1)
 				setWidth[i].setSelection(65);
 			else
 				setWidth[i].setSelection(500);
-			xpos += 70;
+			xpos += 90;
 			
 			//listener - when spinners are changed, recalculate the width
 			setWidth[i].addSelectionListener(new SelectionAdapter() {
@@ -134,7 +144,7 @@ public class MyWindow {
 		//"Calculate eigenvalues" button
 		eigenvaluesButton = new Button (shell, SWT.PUSH);
 		eigenvaluesButton.setText("Eigenvals");
-		eigenvaluesButton.setBounds(600, 410, 80, 40);
+		eigenvaluesButton.setBounds(600, 360, 80, 40);
 		
 		eigenvaluesButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -145,26 +155,26 @@ public class MyWindow {
 		
 		
 		labelSearchMinimumStrainA = new Label(shell, SWT.HORIZONTAL);
-		labelSearchMinimumStrainA.setBounds(813, 455, 65, 20);
+		labelSearchMinimumStrainA.setBounds(813, 405, 65, 20);
 		labelSearchMinimumStrainA.setText("|a(l)-a(s)|");
 		
 		labelSearchMinimumStrainEg = new Label(shell, SWT.HORIZONTAL);
-		labelSearchMinimumStrainEg.setBounds(890, 455, 40, 20);
+		labelSearchMinimumStrainEg.setBounds(890, 405, 40, 20);
 		labelSearchMinimumStrainEg.setText("Eg <");
 		
 		final Spinner SearchMinimumStrainA = new Spinner(shell, SWT.NONE);
 		StrainLatticeSpinner(SearchMinimumStrainA);
-		SearchMinimumStrainA.setBounds(810,480,70,20);
+		SearchMinimumStrainA.setBounds(810,430,70,20);
 		
 		final Spinner SearchMinimumStrainEg = new Spinner(shell, SWT.NONE);
 		EgSpinner(SearchMinimumStrainEg);
-		SearchMinimumStrainEg.setBounds(880,480,70,20);
+		SearchMinimumStrainEg.setBounds(880,430,70,20);
 		SearchMinimumStrainEg.setSelection(8000);
 		
 		//"Calculate minimum strain" button
 		eigenvaluesButton = new Button (shell, SWT.PUSH);
 		eigenvaluesButton.setText("Search minimum strain");
-		eigenvaluesButton.setBounds(600, 475, 200, 30);
+		eigenvaluesButton.setBounds(600, 425, 200, 30);
 		
 		eigenvaluesButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -175,7 +185,7 @@ public class MyWindow {
 		xpos = 720;
 		for (int i=0; i<3; i++) {
 			whichPsi[i] = new Label(shell, SWT.HORIZONTAL);
-			whichPsi[i].setBounds(xpos, 400, 70, 20);
+			whichPsi[i].setBounds(xpos, 350, 70, 20);
 			xpos += 70;
 		}
 		whichPsi[0].setText("EE");
@@ -186,7 +196,7 @@ public class MyWindow {
 		//Choose which eigenvector to draw
 		choosePsiE = new Combo(shell, SWT.READ_ONLY);
 		choosePsiE.setItems(new String[]{});
-		choosePsiE.setBounds(690, 420, 70, 20);
+		choosePsiE.setBounds(690, 370, 70, 20);
 		
 		choosePsiE.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -196,7 +206,7 @@ public class MyWindow {
 		
 		choosePsiHH = new Combo(shell, SWT.READ_ONLY);
 		choosePsiHH.setItems(new String[]{});
-		choosePsiHH.setBounds(760, 420, 70, 20);
+		choosePsiHH.setBounds(760, 370, 70, 20);
 		
 		choosePsiHH.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -206,7 +216,7 @@ public class MyWindow {
 		
 		choosePsiLH = new Combo(shell, SWT.READ_ONLY);
 		choosePsiLH.setItems(new String[]{});
-		choosePsiLH.setBounds(830, 420, 70, 20);
+		choosePsiLH.setBounds(830, 370, 70, 20);
 		
 		choosePsiLH.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -215,83 +225,113 @@ public class MyWindow {
 		});
 		
 		// a loop for all binary spinners
-		xpos = 120;
-		for (sc=0; sc<4; sc++) {
+		xpos = 40;
+		xwidth = 70;
+		for (sc=0; sc<5; sc++) {
 			//creating choice lists for binary compounds
-			chooseBinary[sc] = new Combo(shell, SWT.READ_ONLY);
+			chooseBinary[sc] = new Combo(compositeBasic, SWT.READ_ONLY);
 			chooseBinary[sc].setItems(binaryOptions);
-			chooseBinary[sc].setBounds(xpos, 400, 70, 20);
+			chooseBinary[sc].setBounds(xpos, 0, xwidth, 20);
 			
 			//creating spinners for bandgap
-			setEgBinary[sc] = new Spinner(shell, SWT.NONE);
+			setEgBinary[sc] = new Spinner(compositeBasic, SWT.NONE);
 			EgSpinner(setEgBinary[sc]);
-			setEgBinary[sc].setBounds(xpos, 470, 70, 20);
+			setEgBinary[sc].setBounds(xpos, 60, xwidth, 20);
 
 			//creating spinners for lattice constant
-			setLatticeBinary[sc] = new Spinner(shell, SWT.NONE);
+			setLatticeBinary[sc] = new Spinner(compositeBasic, SWT.NONE);
 			LatticeSpinner(setLatticeBinary[sc]);
-			setLatticeBinary[sc].setBounds(xpos, 505, 70, 20);
+			setLatticeBinary[sc].setBounds(xpos, 90, xwidth, 20);
 			
 			//creating spinners for VBO
-			setVBOBinary[sc] = new Spinner(shell, SWT.NONE);
+			setVBOBinary[sc] = new Spinner(compositeBasic, SWT.NONE);
 			VBOSpinner(setVBOBinary[sc]);
-			setVBOBinary[sc].setBounds(xpos, 540, 70, 20);
+			setVBOBinary[sc].setBounds(xpos, 120, xwidth, 20);
 			
 			//creating spinners for ac
-			setAcBinary[sc] = new Spinner(shell, SWT.NONE);
+			setAcBinary[sc] = new Spinner(compositeMaterial, SWT.NONE);
 			ASpinner(setAcBinary[sc]);
-			setAcBinary[sc].setBounds(xpos, 575, 70, 20);
+			setAcBinary[sc].setBounds(xpos, 30, xwidth, 20);
 			
 			//creating spinners for av
-			setAvBinary[sc] = new Spinner(shell, SWT.NONE);
+			setAvBinary[sc] = new Spinner(compositeMaterial, SWT.NONE);
 			ASpinner(setAvBinary[sc]);
-			setAvBinary[sc].setBounds(xpos, 610, 70, 20);
+			setAvBinary[sc].setBounds(xpos, 60, xwidth, 20);
 			
 			//creating spinners for c11
-			setC11Binary[sc] = new Spinner(shell, SWT.NONE);
+			setC11Binary[sc] = new Spinner(compositeMaterial, SWT.NONE);
 			CSpinner(setC11Binary[sc]);
-			setC11Binary[sc].setBounds(xpos, 645, 70, 20);
+			setC11Binary[sc].setBounds(xpos, 90, xwidth, 20);
 			
 			//creating spinners for c12
-			setC12Binary[sc] = new Spinner(shell, SWT.NONE);
+			setC12Binary[sc] = new Spinner(compositeMaterial, SWT.NONE);
 			CSpinner(setC12Binary[sc]);
-			setC12Binary[sc].setBounds(xpos, 680, 70, 20);
+			setC12Binary[sc].setBounds(xpos, 120, xwidth, 20);
 			
 			//creating spinners for deformation potential
-			setBBinary[sc] = new Spinner(shell, SWT.NONE);
+			setBBinary[sc] = new Spinner(compositeMaterial, SWT.NONE);
 			BSpinner(setBBinary[sc]);
-			setBBinary[sc].setBounds(xpos, 715, 70, 20);
+			setBBinary[sc].setBounds(xpos, 150, xwidth, 20);
+			
+			//creating spinners for electron effective mass
+			setEMassBinary[sc] = new Spinner(compositeMaterial, SWT.NONE);
+			MassSpinner(setEMassBinary[sc]);
+			setEMassBinary[sc].setBounds(xpos, 180, xwidth, 20);
+			
+			//creating spinners for heavy hole effective mass
+			setHHMassBinary[sc] = new Spinner(compositeMaterial, SWT.NONE);
+			MassSpinner(setHHMassBinary[sc]);
+			setHHMassBinary[sc].setBounds(xpos, 210, xwidth, 20);
+			
+			//creating spinners for light hole effective mass
+			setLHMassBinary[sc] = new Spinner(compositeMaterial, SWT.NONE);
+			MassSpinner(setLHMassBinary[sc]);
+			setLHMassBinary[sc].setBounds(xpos, 240, xwidth, 20);
 			
 			xpos += 80;
 		}
 		
 		compounds = new Compounds(this);
 		addTernaryLabels();
-		xpos = 120;
+		xpos = 40;
 		for (int sc=0; sc<4; sc++) {
 			
 			final int localSc = sc;
-			setXBinary[localSc] = new Spinner(shell, SWT.NONE);
+			setXBinary[localSc] = new Spinner(compositeBasic, SWT.NONE);
 			XSpinner(setXBinary[localSc]);
-			setXBinary[localSc].setBounds(xpos, 435, 70, 20);
+			setXBinary[localSc].setBounds(xpos, 30, 70, 20);
 			
 			
 			//loading config from a class (todo: config from a file)
 			chooseBinary[localSc].addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					int selection = chooseBinary[localSc].getSelectionIndex();
-					loadConf(localSc);
+					loadConf(0, localSc);
 					compounds.setBinary(localSc, selection);
+					ternaryLabels[0].setText(compounds.ternaries[0].getLabel());
+					ternaryLabels[1].setText(compounds.ternaries[1].getLabel());
 					plotMain.replot();
 					plotMain.resetComp();
 				}
 			});
 
 			chooseBinary[localSc].select(localSc);
-			loadConf(sc);
+			loadConf(0, sc);
 			
 			xpos += 80;
 		}
+		
+		
+		chooseBinary[4].addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				int selection = chooseBinary[4].getSelectionIndex();
+				compounds.setSubstrate(selection);
+				loadConf(1, 4);
+				plotMain.replot();
+			}
+		});
+		chooseBinary[4].select(4);
+		loadConf(1, 4);
 		
 		addOneLabels();
 		
@@ -337,8 +377,10 @@ public class MyWindow {
 		plotMain = new MyPlot(display, shell, this, compounds);
 		
 		output = new Text (shell, SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
-		output.setBounds(600, 567, 370, 200);
+		output.setBounds(600, 517, 370, 200);
 		output.insert("...");
+		
+		tabFolder.pack();
 		
 		while (!shell.isDisposed ()) {
 		if (!display.readAndDispatch ()) display.sleep ();
@@ -422,40 +464,53 @@ public class MyWindow {
 		spinner.setIncrement(1); // set the increment value to 0.0001
 	}
 	
+	private void MassSpinner(Spinner spinner) {
+		spinner.setDigits(3); // allow 1 decimal place
+		spinner.setMinimum(0); // set the minimum value to 1.0
+		spinner.setMaximum(5000); // set the maximum value to 10000
+		spinner.setIncrement(1); // set the increment value to 0.0001
+	}
+	
 	//a method to add labels (leftmost column: Eg, a, VBO etc.)
 	private void addLeftLabels() {
 
-		String[] labelString = new String [] {"x", "Eg", "a", "VBO", "ac", "av", "c11", "c12", "b"};
-		Label labelsTab[] = new Label[9];
-		int ypos = 435;
-		for (int i = 0; i<9; i++) {
-		labelsTab[i] = new Label(shell, SWT.HORIZONTAL);
-		labelsTab[i].setBounds(50, ypos, 70, 20);
-		labelsTab[i].setText(labelString[i]);
-		ypos += 35;
+		String[] labelString = new String [] {"x", "Eg", "a", "VBO", "ac", "av", "c11", "c12", "b", "m(e)", "m(hh)", "m(lh)"};
+		Label labelsTab[] = new Label[12];
+		int ypos = 30;
+		xwidth = 40;
+		for (int i = 0; i<12; i++) {
+			if (i<4) {
+				labelsTab[i] = new Label(compositeBasic, SWT.HORIZONTAL);
+				labelsTab[i].setBounds(0, ypos, xwidth, 20);
+			}
+			else {
+				labelsTab[i] = new Label(compositeMaterial, SWT.HORIZONTAL);
+				labelsTab[i].setBounds(0, ypos-120, xwidth, 20);
+			}
+			labelsTab[i].setText(labelString[i]);
+			ypos += 30;
 		}
 	}
 	
 	//create labels in the center (ternary1 and ternary2)
 	private void addTernaryLabels() {
 
-		String[] labelString = new String [] {compounds.layer.ternary1.label, compounds.layer.ternary2.label};
-		Label labelsTab[] = new Label[2];
-		int xpos = 450;
+		String[] labelString = new String [] {compounds.ternaries[0].getLabel(), compounds.ternaries[1].getLabel()};
+		int xpos = 90;
 		for (int i = 0; i<2; i++) {
-		labelsTab[i] = new Label(shell, SWT.HORIZONTAL);
-		labelsTab[i].setBounds(xpos, 400, 70, 20);
-		labelsTab[i].setText(labelString[i]);
-		xpos += 70;
+			ternaryLabels[i] = new Label(compositeBasic, SWT.HORIZONTAL);
+			ternaryLabels[i].setBounds(xpos, 150, 70, 20);
+			ternaryLabels[i].setText(labelString[i]);
+			xpos += 160;
 		}
 	}
 	
 	private void addOneLabels() {
-		int xpos = 450;
+		int xpos = 270;
 
 		for (int i = 0; i<4; i++) {
-			compTab[i] = new Label(shell, SWT.HORIZONTAL);
-			compTab[i].setBounds(xpos, 540, 39, 20);
+			compTab[i] = new Label(compositeBasic, SWT.HORIZONTAL);
+			compTab[i].setBounds(xpos, 230, 39, 20);
 			xpos += 39;
 		}
 		refreshOneLabels(compTab);
@@ -464,10 +519,10 @@ public class MyWindow {
 	
 	private void refreshOneLabels(Label compTab[]) {
 		String[] labelString = new String [4];
-		labelString[0] = Double.toString(roundTwoDecimals(((double) setXBinary[0].getSelection()/100* (double) setXTernary[0].getSelection()/100)+(double) setXBinary[2].getSelection()/100*(double) setXTernary[1].getSelection()/100));
-		labelString[1] = "| " + Double.toString(roundTwoDecimals(((double) setXBinary[1].getSelection()/100* (double) setXTernary[0].getSelection()/100)+(double) setXBinary[3].getSelection()/100*(double) setXTernary[1].getSelection()/100));
-		labelString[2] = "| " + Double.toString(roundTwoDecimals((double) setXTernary[0].getSelection()/100));
-		labelString[3] = "| " + Double.toString(roundTwoDecimals((double) setXTernary[1].getSelection()/100));
+		labelString[0] = Double.toString(round(((double) setXBinary[0].getSelection()/100* (double) setXTernary[0].getSelection()/100)+(double) setXBinary[2].getSelection()/100*(double) setXTernary[1].getSelection()/100,2));
+		labelString[1] = "| " + Double.toString(round(((double) setXBinary[1].getSelection()/100* (double) setXTernary[0].getSelection()/100)+(double) setXBinary[3].getSelection()/100*(double) setXTernary[1].getSelection()/100,2));
+		labelString[2] = "| " + Double.toString(round((double) setXTernary[0].getSelection()/100,2));
+		labelString[3] = "| " + Double.toString(round((double) setXTernary[1].getSelection()/100,2));
 		
 		for (int i = 0; i<4; i++) {
 			compTab[i].setText(labelString[i]);
@@ -490,15 +545,24 @@ public class MyWindow {
 				return 0;
 	}
 	
-	private void loadConf(int localSc) {
-		int egInt = (int) (compounds.binaries[localSc].getBandgap() * Math.pow(10, setEgBinary[localSc].getDigits()));
-		int latticeInt = (int) (compounds.binaries[localSc].getLatticeConstant() * Math.pow(10, setLatticeBinary[localSc].getDigits()));
-		int vboInt = (int) (compounds.binaries[localSc].getVBO() * Math.pow(10, setVBOBinary[localSc].getDigits()));
-		int acInt = (int) (compounds.binaries[localSc].getAc() * Math.pow(10, setAcBinary[localSc].getDigits()));
-		int avInt = (int) (compounds.binaries[localSc].getAv() * Math.pow(10, setAvBinary[localSc].getDigits()));
-		int c11Int = (int) (compounds.binaries[localSc].getC11() * Math.pow(10, setC11Binary[localSc].getDigits()));
-		int c12Int = (int) (compounds.binaries[localSc].getC12() * Math.pow(10, setC12Binary[localSc].getDigits()));
-		int bInt = (int) (compounds.binaries[localSc].getDeformationPotential() * Math.pow(10, setBBinary[localSc].getDigits()));
+	private void loadConf(int binOrSubs, int localSc) {
+		CompoundBinary temp;
+		if (binOrSubs == 0)
+			temp = compounds.binaries[localSc];
+		else
+			temp = compounds.substrate;
+		
+		int egInt = (int) (temp.getBandgap() * Math.pow(10, setEgBinary[localSc].getDigits()));
+		int latticeInt = (int) (temp.getLatticeConstant() * Math.pow(10, setLatticeBinary[localSc].getDigits()));
+		int vboInt = (int) (temp.getVBO() * Math.pow(10, setVBOBinary[localSc].getDigits()));
+		int acInt = (int) (temp.getAc() * Math.pow(10, setAcBinary[localSc].getDigits()));
+		int avInt = (int) (temp.getAv() * Math.pow(10, setAvBinary[localSc].getDigits()));
+		int c11Int = (int) (temp.getC11() * Math.pow(10, setC11Binary[localSc].getDigits()));
+		int c12Int = (int) (temp.getC12() * Math.pow(10, setC12Binary[localSc].getDigits()));
+		int bInt = (int) (temp.getDeformationPotential() * Math.pow(10, setBBinary[localSc].getDigits()));
+		int eMassInt = (int) (temp.getEmass() * Math.pow(10, setEMassBinary[localSc].getDigits()));
+		int hhMassInt = (int) (temp.getHHmass() * Math.pow(10, setHHMassBinary[localSc].getDigits()));
+		int lhMassInt = (int) (temp.getLHmass() * Math.pow(10, setLHMassBinary[localSc].getDigits()));
 		setEgBinary[localSc].setSelection(egInt);
 		setLatticeBinary[localSc].setSelection(latticeInt);
 		setVBOBinary[localSc].setSelection(vboInt);
@@ -507,11 +571,13 @@ public class MyWindow {
 		setC11Binary[localSc].setSelection(c11Int);
 		setC12Binary[localSc].setSelection(c12Int);
 		setBBinary[localSc].setSelection(bInt);
+		setEMassBinary[localSc].setSelection(eMassInt);
+		setHHMassBinary[localSc].setSelection(hhMassInt);
+		setLHMassBinary[localSc].setSelection(lhMassInt);
 	}
 	
-	double roundTwoDecimals(double d) {
-    	DecimalFormat twoDForm = new DecimalFormat("#.##");
-	return Double.valueOf(twoDForm.format(d));
+	double round(double d, int i) {
+		return (double)((int) (d * Math.pow(10,i)))/Math.pow(10, i);
 	}
 	
 	public int getChosenBinary(int which) {
@@ -519,7 +585,7 @@ public class MyWindow {
 	}
 	
 	public int getChosenSubstrate() {
-		return chooseSubstrate.getSelectionIndex();
+		return chooseBinary[4].getSelectionIndex();
 	}
 	
 	private void resetSpinner(Spinner spinner) {
@@ -546,25 +612,33 @@ public class MyWindow {
 	}
 	
 	private void parameterListeners() {
-		final Spinner[][] container = new Spinner[][] {setEgBinary, setLatticeBinary, setVBOBinary, setAcBinary, setAvBinary, setC11Binary, setC12Binary, setBBinary}; 
-		for (int j=0; j<8; j++) {
-			for (int sc=0; sc<4; sc++) {
+		final Spinner[][] container = new Spinner[][] {setEgBinary, setLatticeBinary, setVBOBinary, setAcBinary, setAvBinary, setC11Binary, setC12Binary, setBBinary, setEMassBinary, setHHMassBinary, setLHMassBinary}; 
+		for (int j=0; j<11; j++) {
+			for (int sc=0; sc<5; sc++) {
 				final int localJ = j;
 				final int localSc = sc;
+				final CompoundBinary temp;
+				if (sc == 4)
+					temp = compounds.substrate;
+				else
+					temp = compounds.binaries[localSc];
 				container[j][localSc].addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
 						int selection = container[localJ][localSc].getSelection();
 						int digits = container[localJ][localSc].getDigits();
 						double value = (double) selection / Math.pow(10, digits);
 						switch (localJ) {
-						case 0: compounds.binaries[localSc].setBandgap(value); break;
-						case 1: compounds.binaries[localSc].setLatticeConstant(value); break;
-						case 2: compounds.binaries[localSc].setVBO(value); break;
-						case 3: compounds.binaries[localSc].setAc(value); break;
-						case 4: compounds.binaries[localSc].setAv(value); break;
-						case 5: compounds.binaries[localSc].setC11(value); break;
-						case 6: compounds.binaries[localSc].setC12(value); break;
-						case 7: compounds.binaries[localSc].setDeformationPotential(value); break;
+						case 0: temp.setBandgap(value); break;
+						case 1: temp.setLatticeConstant(value); break;
+						case 2: temp.setVBO(value); break;
+						case 3: temp.setAc(value); break;
+						case 4: temp.setAv(value); break;
+						case 5: temp.setC11(value); break;
+						case 6: temp.setC12(value); break;
+						case 7: temp.setDeformationPotential(value); break;
+						case 8: temp.setEmass(value); break;
+						case 9: temp.setHhmass(value); break;
+						case 10: temp.setLhmass(value); break;
 						}
 						plotMain.resetComp();
 					}
